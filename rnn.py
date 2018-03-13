@@ -145,8 +145,8 @@ if __name__ == '__main__':
     from Data import *
     from solver import *
 
-    data_str = np.load('data_str.npy')
-    features = np.load('features.npy')
+    data_str = np.load('files/data_str.npy')
+    features = np.load('files/features.npy')
     output_dim = features.shape[0]
     d = Data()
     data = np.concatenate((d.load_data()[:, d.address:d.time], d.load_data()[:, d.time_interval].reshape(-1, 1)),

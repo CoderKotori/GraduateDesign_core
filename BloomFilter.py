@@ -19,11 +19,11 @@ class BloomFilter:
             self.m = m
             self.k = k
         elif mode is 'test':
-            param = np.load('bf_param.npy')
+            param = np.load('files/bf_param.npy')
             self.m = param[0]
             self.k = param[1]
             self.v = bitarray()
-            with open('bf.bin', 'rb') as fr:
+            with open('files/bf.bin', 'rb') as fr:
                 self.v.fromfile(fr)
         else:
             raise ValueError('Invalid mode: "%s"' % mode)
@@ -54,11 +54,11 @@ class BloomFilter:
         if self.mode is 'train':
             param = [self.m, self.k]
             param = np.array(param)
-            np.save('bf_param.npy', param)
+            np.save('files/bf_param.npy', param)
             N = data.shape[0]
             for i in range(N):
                 self._insert(data[i])
-            with open('bf.bin', 'wb') as fw:
+            with open('files/bf.bin', 'wb') as fw:
                 self.v.tofile(fw)
             return None
         elif self.mode is 'test':
@@ -90,7 +90,7 @@ if __name__ == '__main__':
 
     d = Data()
 
-    data_str = np.load('data_str.npy')
+    data_str = np.load('files/data_str.npy')
     count = 0
     features_normal = []
     result = d.load_data()[:, d.binary_result].astype(int)

@@ -3,7 +3,7 @@ import numpy as np
 
 class Data:
     def __init__(self):
-        self.data = np.load('data.npy')
+        self.data = np.load('files/data.npy')
         self.address = 0
         self.function = 1
         self.length = 2
