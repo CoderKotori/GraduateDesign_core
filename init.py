@@ -9,10 +9,12 @@ from Data import *
 PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
 data_file_path = os.path.join(PROJECT_ROOT, "files/IanArffDataset.arff")
 data_raw = arff.load(open(data_file_path, 'rb'))
+print 'import raw file'
 
 '''initialize data '''
 data = data_raw['data']
 data = np.array(data)
+print 'initialize data'
 
 '''add time interval as a new row'''
 time_interval = []
@@ -24,6 +26,7 @@ for i in range(data.shape[0]):
         time_interval.append(delta)
 data = np.column_stack((data, time_interval))
 np.save('files/data.npy', data)
+print 'add time interval as a new row'
 
 d = Data()
 
@@ -31,14 +34,17 @@ d = Data()
 time_interval = data[:, d.time_interval].reshape(data.shape[0], 1)
 kmeans_ti = Kmeans(time_interval, None, k=2)
 kmeans_ti.calc('files/pred_timeinterval.npy', 20, 2000)
+print 'time interval done'
 
 crc_rate = data[:, d.crc_rate].reshape(data.shape[0], 1)
 kmeans_cr = Kmeans(crc_rate, None, k=2)
 kmeans_cr.calc('files/pred_crcrate.npy', 20, 200)
+print 'crc rate done'
 
 pid = data[:, d.gain:d.rate + 1]
 kmeans_pid = Kmeans(pid, None, k=32)
 kmeans_pid.calc('files/pred_pid.npy', 20, 2000)
+print 'pid done'
 
 pressure_measurement = data[:, d.pressure_measurement]
 setpoint = data[:, d.setpoint]
@@ -46,6 +52,7 @@ disc_pm = discrete(pressure_measurement, 20)
 disc_sp = discrete(setpoint, 10)
 np.save('files/disc_pm.npy', disc_pm)
 np.save('files/disc_setpoint.mpy', disc_sp)
+print 'pressure measurement and  setpoint done'
 
 pm = np.load('files/disc_pm.npy')
 setpoint = np.load('files/disc_setpoint.npy')
@@ -58,6 +65,7 @@ data[:, d.crc_rate] = nearest(crc_rate, data[:, d.crc_rate])
 data[:, d.time_interval] = nearest(ti, data[:, d.time_interval])
 data[:, d.gain:d.rate + 1] = nearest_plus(pid, data[:, d.gain:d.rate + 1])
 np.save('files/data.npy', data)
+print 'discrete data'
 
 '''generate signature'''
 data = data[:, d.address:d.time]
@@ -73,6 +81,7 @@ for i in range(data.shape[0]):
     data_str.append(tmp)
 data_str = np.array(data_str)
 np.save('files/data_str.npy', data_str)
+print 'generate signature'
 
 '''
 save features
@@ -87,6 +96,7 @@ for i in range(data_str.shape[0]):
         if data_str[i] not in features:
             features.append(data_str[i])
 np.save('files/features.npy', features)
+print 'save all features'
 
 '''
 save normal features
@@ -104,4 +114,4 @@ for i in range(data_str.shape[0]):
                 features_normal.append(data_str[i])
 features_normal = np.array(features_normal)
 np.save('files/features_normal.npy', features_normal)
-
+print 'save normal features'

@@ -14,11 +14,8 @@ class Kmeans:
             if data[i, 0] is not None:
                 if self.data is None:
                     self.data = data[i, :].reshape(1, D)
-                    print 'the first'
                 else:
                     self.data = np.concatenate((self.data, data[i, :].reshape(1, D)), axis=0)
-                    print 'add column ', i
-        print self.data.shape
         self.N, self.D = self.data.shape
         if datapath is not None:
             tmp = np.load(datapath)
@@ -65,7 +62,6 @@ class Kmeans:
         for k in range(self.k):
             mask = c == k
             count = np.sum(mask)
-            print count
             if count == 0:
                 count = 1
             val = np.zeros(self.D)
