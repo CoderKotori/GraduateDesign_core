@@ -5,6 +5,32 @@ from Kmeans import *
 from Discretization import *
 from Data import *
 
+
+def init_input(data, result_pos, output_num=None, length=10):
+    if len(data.shape) > 2:
+        raise Exception('unexpected data shape')
+    N, _ = data.shape
+    pos = 0
+    input = []
+    count = 0
+    while pos < N:
+        verify = True
+        for i in range(length):
+            if data[pos + i, result_pos] == 1:
+                verify = False
+                pos += i + 1
+                break
+        if verify:
+            if output_num is None:
+                pass
+            else:
+                count += 1
+            add = data[pos:pos+length]
+            input.append(add)
+            pos += length
+    return np.array(input)
+
+
 '''import raw file'''
 PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
 data_file_path = os.path.join(PROJECT_ROOT, "files/IanArffDataset.arff")
@@ -16,14 +42,47 @@ data = data_raw['data']
 data = np.array(data)
 print 'initialize data'
 
+# some tests
+tmp_pid = data[:, 4:9]
+crc = data[:, 14]
+pid = None
+D = tmp_pid.shape[1]
+for i in range(tmp_pid.shape[0]):
+    if tmp_pid[i, 0] is not None:
+        if pid is None:
+            pid = tmp_pid[i, :].reshape(1, D)
+        else:
+            pid = np.concatenate((pid, tmp_pid[i, :].reshape(1, D)), axis=0)
+
 '''add time interval as a new row'''
-time_interval = []
-for i in range(data.shape[0]):
-    if i == 0:
-        time_interval.append(0)
-    else:
-        delta = data[i, 16] - data[i - 1, 16]
-        time_interval.append(delta)
+# time_interval = []
+# for i in range(data.shape[0]):
+#     if i == 0:
+#         time_interval.append(0)
+#     else:
+#         delta = data[i, 16] - data[i - 1, 16]
+#         time_interval.append(delta)
+# ti = np.array(time_interval)
+import matplotlib.pyplot as plt
+
+N = data.shape[0]
+
+# myset = set(ti)
+# for item in myset:
+#     y.append(time_interval.count(item))
+from sklearn.decomposition import PCA
+
+pca = PCA(n_components=3)
+new_pid = pca.fit_transform(pid)
+x = new_pid[:, 0]
+y = new_pid[:, 1]
+z = new_pid[:, 2]
+
+import mpl_toolkits.mplot3d
+ax = plt.subplot(111, projection='3d')
+ax.scatter(x, y, z, marker='.')
+plt.show()
+assert False
 data = np.column_stack((data, time_interval))
 np.save('files/data.npy', data)
 print 'add time interval as a new row'
@@ -59,15 +118,20 @@ setpoint = np.load('files/disc_setpoint.npy')
 crc_rate = np.load('files/pred_crcrate.npy')
 pid = np.load('files/pred_pid.npy')
 ti = np.load('files/pred_timeinterval.npy')
+# data[:, d.pressure_measurement] = nearest(pm, data[:, d.pressure_measurement])
+# data[:, d.setpoint] = nearest(setpoint, data[:, d.setpoint])
+# data[:, d.crc_rate] = nearest(crc_rate, data[:, d.crc_rate])
+# data[:, d.time_interval] = nearest(ti, data[:, d.time_interval])
+# data[:, d.gain:d.rate + 1] = nearest_plus(pid, data[:, d.gain:d.rate + 1])
+# np.save('files/data.npy', data)
+# print 'discrete data'
+
+'''generate signature'''
 data[:, d.pressure_measurement] = nearest(pm, data[:, d.pressure_measurement])
 data[:, d.setpoint] = nearest(setpoint, data[:, d.setpoint])
 data[:, d.crc_rate] = nearest(crc_rate, data[:, d.crc_rate])
 data[:, d.time_interval] = nearest(ti, data[:, d.time_interval])
 data[:, d.gain:d.rate + 1] = nearest_plus(pid, data[:, d.gain:d.rate + 1])
-np.save('files/data.npy', data)
-print 'discrete data'
-
-'''generate signature'''
 data = data[:, d.address:d.time]
 data = np.concatenate((data, d.load_data()[:, d.time_interval].reshape(-1, 1)), axis=1)
 data_str = []

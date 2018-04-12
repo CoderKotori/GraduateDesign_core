@@ -140,13 +140,24 @@ class CaptioningRNN(object):
 
         return loss, grads
 
+    def verify(self, data_in, data_out=None, k=5):
+        scores = self.loss(data_in)
+        N, T, _ = scores.shape
+        for i in range(N):
+            for t in range(T):
+                index = np.argpartition(scores[i, t], -k)[-k:]
+                prob_result = features[index]
+                if test_out[i, t] in prob_result:
+                    pass
+
 
 if __name__ == '__main__':
     from Data import *
     from solver import *
 
+    # init data
     data_str = np.load('files/data_str.npy')
-    features = np.load('files/features.npy')
+    features = np.load('files/features_normal.npy')
     output_dim = features.shape[0]
     d = Data()
     data = np.concatenate((d.load_data()[:, d.address:d.time], d.load_data()[:, d.time_interval].reshape(-1, 1)),
@@ -159,16 +170,34 @@ if __name__ == '__main__':
             else:
                 data[i, j] = float(data[i, j])
     data = data.astype(float)
-    train_start = 0
-    train_end = 1000
-    train_in = data[train_start:train_end, :]
-    train_out = data_str[train_start + 1:train_end + 1]
-    out = np.zeros_like(train_out)
-    for i in range(train_out.shape[0]):
-        out[i] = int(np.where(features == train_out[i])[0][0])
-    out = out.astype(int)
-    data_in = train_in.reshape(-1, 2, input_dim)
-    data_out = out.reshape(-1, 2)
+
+    num_train = 10000
+    seq_length = 2
+
+    data_in = np.zeros((num_train * seq_length, input_dim))
+    data_out = np.zeros((num_train * seq_length)).astype(object)
+    num = 0
+    result = d.load_data()[:, d.binary_result].astype(int)
+    for it in range(data.shape[0]):
+        if result[it] == 0 and result[it + 1] == 0 and result[it + 2] == 0:
+            # add data_in
+            data_in[num] = data[it]
+            data_in[num + 1] = data[it + 1]
+            # add data_out
+            data_out[num] = data_str[it + 1]
+            data_out[num + 1] = data_str[it + 2]
+            num += 2
+            if num >= num_train * seq_length:
+                break
+    for i in range(data_out.shape[0]):
+        pos = np.where(features == data_out[i])[0][0]
+        # print i, ',', pos
+        data_out[i] = int(pos)
+    data_out = data_out.astype(int)
+
+    data_in = data_in.reshape(num_train, seq_length, input_dim)
+    data_out = data_out.reshape(num_train, seq_length)
+
     lstm = CaptioningRNN(input_dim, output_dim, hidden_dim=512, cell_type='lstm')
 
     train_data = {}
@@ -176,7 +205,7 @@ if __name__ == '__main__':
     train_data['train_out'] = data_out
     solver = Solver(lstm, train_data, update_rule='adam',
                     num_epochs=10,
-                    batch_size=100,
+                    batch_size=1000,
                     optim_config={
                         'learning_rate': 5e-3,
                     },
@@ -203,4 +232,8 @@ if __name__ == '__main__':
     test_data['test_in'] = test_in
     test_data['test_out'] = test_out
     test_data['test_result'] = test_result
-    tp, tn, fp, fn = solver.test(test_data, features)
+    tp, tn, fp, fn, count = solver.test(test_data, features)
+    print 'true positive: ', tp / count
+    print 'true negative: ', tn / count
+    print 'false positive: ', fp / count
+    print 'false negative: ', fn / count

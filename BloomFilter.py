@@ -18,7 +18,7 @@ class BloomFilter:
             self.v.setall(0)
             self.m = m
             self.k = k
-        elif mode is 'test':
+        elif mode in ['test', 'verify']:
             param = np.load('files/bf_param.npy')
             self.m = param[0]
             self.k = param[1]
@@ -71,6 +71,7 @@ class BloomFilter:
                 raise Exception('data not match')
             for j in range(count):
                 if self._judge(data[j]) is True:
+
                     if result[j] == 0:
                         tp += 1.0
                     else:
@@ -81,6 +82,12 @@ class BloomFilter:
                     else:
                         tn += 1.0
             return tp, tn, fp, fn, count
+        elif self.mode is 'verify':
+            data_valid = []
+            for i in range(data.shape[0]):
+                if self._judge(data[i]) is True:
+                    data_valid.append(i)
+            return np.array(data_valid)
         else:
             print 'this situation can not happen'
 
@@ -91,10 +98,10 @@ if __name__ == '__main__':
     d = Data()
 
     data_str = np.load('files/data_str.npy')
-    count = 0
-    features_normal = []
+    features_normal = np.load('files/features_normal.npy')
     result = d.load_data()[:, d.binary_result].astype(int)
-
+    # bf_train = BloomFilter(mode='train', m=15700, k=8)
+    # bf_train.run(features_normal)
     test_start = 5000
     test_end = 10000
     tp, tn, fp, fn, count = BloomFilter(mode='test').run(data_str[test_start:test_end], result[test_start:test_end])
