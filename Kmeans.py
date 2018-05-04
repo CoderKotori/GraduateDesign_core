@@ -42,7 +42,7 @@ class Kmeans:
             else:
                 next = cur + batch
             data = self.data[cur:next]
-            print 'calculating distance: ', cur, '~', next
+            # print 'calculating distance: ', cur, '~', next
             dist = data.reshape((next - cur, 1, self.D)) - self.pred.reshape((1, self.k, self.D))
             dist = np.sum(dist ** 2, axis=-1)
             dist = np.float64(dist)
@@ -67,7 +67,7 @@ class Kmeans:
             val = np.zeros(self.D)
             for i in range(mask.shape[0]):
                 if mask[i]:
-                    val += self.data[i]
+                    val += self.data[i].astype(float)
             # assert False
             self.pred[k] = val / count
         print 'after update: ', self.pred
@@ -76,4 +76,6 @@ class Kmeans:
         for i in range(iterator):
             dist = self.distance(batch_size)
             self.update(dist)
-        np.save(file_name, self.pred)
+        if file_name is not None:
+            np.save(file_name, self.pred)
+        return self.pred
