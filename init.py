@@ -51,52 +51,55 @@ def signature(data_row, crc, ti, pid, pm, sp):
 
 
 def signature_all(d, crc, ti, pid, pm, sp):
-    data = d.load_data()
-    data[:, d.pressure_measurement] = nearest(pm, data[:, d.pressure_measurement])
-    data[:, d.setpoint] = nearest(sp, data[:, d.setpoint])
-    data[:, d.crc_rate] = nearest(crc, data[:, d.crc_rate])
-    data[:, d.time_interval] = nearest(ti, data[:, d.time_interval])
-    data[:, d.gain:d.rate + 1] = nearest_plus(pid, data[:, d.gain:d.rate + 1])
-    data = data[:, d.address:d.time]
-    data = np.concatenate((data, d.load_data()[:, d.time_interval].reshape(-1, 1)), axis=1)
-    data_str = []
-    for i in range(data.shape[0]):
+    data_tmp = d.load_data().copy()
+    data_tmp[:, d.pressure_measurement] = nearest(pm, data_tmp[:, d.pressure_measurement])
+    data_tmp[:, d.setpoint] = nearest(sp, data_tmp[:, d.setpoint])
+    data_tmp[:, d.crc_rate] = nearest(crc, data_tmp[:, d.crc_rate])
+    time_interval = nearest(ti, data_tmp[:, d.time_interval])
+    data_tmp[:, d.gain:d.rate + 1] = nearest_plus(pid, data_tmp[:, d.gain:d.rate + 1])
+    data_tmp = data_tmp[:, d.address:d.time]
+    data_tmp = np.concatenate((data_tmp, time_interval.reshape(-1, 1)), axis=1)
+    data_str_tmp = []
+    for ii in range(data_tmp.shape[0]):
         tmp = ''
-        for j in range(data.shape[1]):
+        for j in range(data_tmp.shape[1]):
             if d.gain <= j <= d.rate:
-                tmp += '$' + str(data[i, j])
+                tmp += '$' + str(data_tmp[ii, j])
             else:
-                tmp += '@' + str(data[i, j])
-        data_str.append(tmp)
-    return np.array(data_str)
+                tmp += '@' + str(data_tmp[ii, j])
+        data_str_tmp.append(tmp)
+    return np.array(data_str_tmp)
 
 
 if __name__ == '__main__':
-    # '''import raw file'''
-    # PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
-    # data_file_path = os.path.join(PROJECT_ROOT, "files/IanArffDataset.arff")
-    # data_raw = arff.load(open(data_file_path, 'rb'))
-    # print 'import raw file'
-    #
-    # '''initialize data '''
-    # data = data_raw['data']
-    # data = np.array(data)
-    # print 'initialize data'
-    #
-    # '''add time interval as a new row'''
-    # time_interval = []
-    # for i in range(data.shape[0]):
-    #     if i == 0:
-    #         time_interval.append(0)
-    #     else:
-    #         delta = data[i, 16] - data[i - 1, 16]
-    #         time_interval.append(delta)
-    # ti = np.array(time_interval)
-    # data = np.column_stack((data, time_interval))
-    # np.save('files/data.npy', data)
-    # print 'add time interval as a new row'
+    '''import raw file'''
+    PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
+    data_file_path = os.path.join(PROJECT_ROOT, "files/IanArffDataset.arff")
+    data_raw = arff.load(open(data_file_path, 'rb'))
+    print 'import raw file'
+
+    '''initialize data '''
+    data = data_raw['data']
+    data = np.array(data)
+    print 'initialize data'
+
+    '''add time interval as a new row'''
+    time_interval = []
+    for i in range(data.shape[0]):
+        if i == 0:
+            time_interval.append(0)
+        else:
+            delta = data[i, 16] - data[i - 1, 16]
+            time_interval.append(delta)
+    ti = np.array(time_interval)
+    data = np.column_stack((data, time_interval))
+    np.save('files/data.npy', data)
+    print 'add time interval as a new row'
+
+
     d = Data()
     data = d.load_data()
+    assert False
     '''discrete the following features'''
     time_interval = data[:, d.time_interval].reshape(data.shape[0], 1)
     kmeans_ti = Kmeans(time_interval, None, k=2)

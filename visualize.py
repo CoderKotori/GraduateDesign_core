@@ -1,45 +1,43 @@
-# some tests
-tmp_pid = data[:, 4:9]
-crc = data[:, 14]
-pid = None
-pm = data[:, 13]
-sp = data[:, 3]
-D = tmp_pid.shape[1]
-for i in range(tmp_pid.shape[0]):
-    if tmp_pid[i, 0] is not None:
-        if pid is None:
-            pid = tmp_pid[i, :].reshape(1, D)
-        else:
-            pid = np.concatenate((pid, tmp_pid[i, :].reshape(1, D)), axis=0)
-
-'''add time interval as a new row'''
-time_interval = []
-for i in range(data.shape[0]):
-    if i == 0:
-        time_interval.append(0)
-    else:
-        delta = data[i, 16] - data[i - 1, 16]
-        time_interval.append(delta)
-ti = np.array(time_interval)
-print 'OK'
+from Data import *
 import matplotlib.pyplot as plt
 
-plt.figure()
-plt.subplot(221)
-plt.hist(ti, 100)
-plt.xlabel('time interval')
+# some tests
+d = Data()
+data = d.load_data()
+tmp_pid = data[:, d.gain:d.rate+1]
+crc = data[:, d.crc_rate]
+pid = []
+tmp_pm = data[:, d.pressure_measurement]
+tmp_sp = data[:, d.setpoint]
+ti = data[:, d.time_interval]
+D = tmp_pid.shape[1]
+
+for i in range(data.shape[0]):
+    if tmp_pid[i, 0] is not None:
+        pid.append(tmp_pid[i, :])
+
+# plt.figure()
+# plt.subplot(221)
+# _, bin = np.histogram(ti, bins=100)
+plt.hist(ti, bins=100)
+plt.title('time interval')
+plt.show()
+print 'time interval done'
 
 plt.subplot(222)
 plt.hist(crc, 100)
-plt.xlabel('crc rate')
+plt.title('crc rate')
+print 'crc rate done'
 
 plt.subplot(223)
 plt.hist(pm, 100)
-plt.xlabel('pressure measurement')
+plt.title('pressure measurement')
+print 'pressure measurement done'
 
 plt.subplot(224)
 plt.hist(sp, 100)
-plt.xlabel('set point')
+plt.title('set point')
+print 'set point done'
 
 plt.show()
 N = data.shape[0]

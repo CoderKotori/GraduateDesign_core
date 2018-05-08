@@ -54,7 +54,7 @@ class Kmeans:
         return distance
 
     def update(self, dist):
-        print 'before update: ', self.pred
+        # print 'before update: ', self.pred
         c = np.zeros(self.N)
         for i in range(self.N):
             c[i] = np.argmin(dist[i])
@@ -70,7 +70,7 @@ class Kmeans:
                     val += self.data[i].astype(float)
             # assert False
             self.pred[k] = val / count
-        print 'after update: ', self.pred
+        # print 'after update: ', self.pred
 
     def calc(self, file_name, iterator, batch_size):
         for i in range(iterator):
