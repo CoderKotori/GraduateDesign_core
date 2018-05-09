@@ -1,5 +1,5 @@
 from rnn_layers import *
-
+import init
 
 class CaptioningRNN(object):
     """
@@ -171,33 +171,34 @@ if __name__ == '__main__':
                 data[i, j] = float(data[i, j])
     data = data.astype(float)
 
-    num_train = 10000
-    seq_length = 2
+    num_train = 1000
+    seq_length = 10
 
-    data_in = np.zeros((num_train * seq_length, input_dim))
-    data_out = np.zeros((num_train * seq_length)).astype(object)
-    num = 0
-    result = d.load_data()[:, d.binary_result].astype(int)
-    for it in range(data.shape[0]):
-        if result[it] == 0 and result[it + 1] == 0 and result[it + 2] == 0:
-            # add data_in
-            data_in[num] = data[it]
-            data_in[num + 1] = data[it + 1]
-            # add data_out
-            data_out[num] = data_str[it + 1]
-            data_out[num + 1] = data_str[it + 2]
-            num += 2
-            if num >= num_train * seq_length:
-                break
-    for i in range(data_out.shape[0]):
-        pos = np.where(features == data_out[i])[0][0]
-        # print i, ',', pos
-        data_out[i] = int(pos)
-    data_out = data_out.astype(int)
+    # data_in = np.zeros((num_train * seq_length, input_dim))
+    # data_out = np.zeros((num_train * seq_length)).astype(object)
+    # num = 0
+    # result = d.load_data()[:, d.binary_result].astype(int)
+    # for it in range(data.shape[0]):
+    #     if result[it] == 0 and result[it + 1] == 0 and result[it + 2] == 0:
+    #         # add data_in
+    #         data_in[num] = data[it]
+    #         data_in[num + 1] = data[it + 1]
+    #         # add data_out
+    #         data_out[num] = data_str[it + 1]
+    #         data_out[num + 1] = data_str[it + 2]
+    #         num += 2
+    #         if num >= num_train * seq_length:
+    #             break
+    # for i in range(data_out.shape[0]):
+    #     pos = np.where(features == data_out[i])[0][0]
+    #     # print i, ',', pos
+    #     data_out[i] = int(pos)
+    # data_out = data_out.astype(int)
+    #
+    # data_in = data_in.reshape(num_train, seq_length, input_dim)
+    # data_out = data_out.reshape(num_train, seq_length)
 
-    data_in = data_in.reshape(num_train, seq_length, input_dim)
-    data_out = data_out.reshape(num_train, seq_length)
-
+    data_in, data_out = init.init_input(data, data_str, d.binary_result, output_num=num_train, length=seq_length)
     lstm = CaptioningRNN(input_dim, output_dim, hidden_dim=512, cell_type='lstm')
 
     train_data = {}

@@ -6,12 +6,13 @@ from Discretization import *
 from Data import *
 
 
-def init_input(data, result_pos, output_num=None, length=10):
+def init_input(data, data_str, result_pos, output_num=None, length=10):
     if len(data.shape) > 2:
         raise Exception('unexpected data shape')
     N, _ = data.shape
     pos = 0
     input = []
+    output = []
     count = 0
     while pos < N:
         verify = True
@@ -27,11 +28,14 @@ def init_input(data, result_pos, output_num=None, length=10):
             else:
                 if count >= output_num:
                     return np.array(input)
-            add = data[pos:pos + length]
-            input.append(add)
+            add_input = data[pos:pos + length]
+            add_output = data_str[pos + 1:pos + length + 1]
+            input.append(add_input)
             count += 1
             pos += length
-    return np.array(input)
+    input = np.array(input)
+    output = np.array(output)
+    return input, output
 
 
 def signature(data_row, crc, ti, pid, pm, sp):
@@ -95,7 +99,6 @@ if __name__ == '__main__':
     data = np.column_stack((data, time_interval))
     np.save('files/data.npy', data)
     print 'add time interval as a new row'
-
 
     d = Data()
     data = d.load_data()

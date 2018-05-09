@@ -122,7 +122,7 @@ if __name__ == '__main__':
     result = d.load_data()[:, d.binary_result].astype(int)
 
     disc_result = []
-    for i in range(5, 50, 5):
+    for i in range(10, 50, 5):
         print 'pid'
         kmeans_pid = Kmeans(raw_pid, None, k=i)
         pid = kmeans_pid.calc(None, 20, 2000)
