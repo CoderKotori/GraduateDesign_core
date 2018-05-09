@@ -1,6 +1,7 @@
 from rnn_layers import *
 import init
 
+
 class CaptioningRNN(object):
     """
     A CaptioningRNN produces captions from image features using a recurrent
@@ -160,8 +161,8 @@ if __name__ == '__main__':
     features = np.load('files/features_normal.npy')
     output_dim = features.shape[0]
     d = Data()
-    data = np.concatenate((d.load_data()[:, d.address:d.time], d.load_data()[:, d.time_interval].reshape(-1, 1)),
-                          axis=1)
+    data = d.load_data()
+
     input_dim = data.shape[1]
     for i in range(data.shape[0]):
         for j in range(input_dim):
@@ -199,6 +200,8 @@ if __name__ == '__main__':
     # data_out = data_out.reshape(num_train, seq_length)
 
     data_in, data_out = init.init_input(data, data_str, d.binary_result, output_num=num_train, length=seq_length)
+    data_in = np.concatenate((data_in[:, d.address:d.time], data_in[:, d.time_interval].reshape(-1, 1)),
+                             axis=1)
     lstm = CaptioningRNN(input_dim, output_dim, hidden_dim=512, cell_type='lstm')
 
     train_data = {}
