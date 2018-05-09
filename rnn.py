@@ -163,15 +163,6 @@ if __name__ == '__main__':
     d = Data()
     data = d.load_data()
 
-    input_dim = data.shape[1]
-    for i in range(data.shape[0]):
-        for j in range(input_dim):
-            if data[i, j] is None:
-                data[i, j] = -1.0
-            else:
-                data[i, j] = float(data[i, j])
-    data = data.astype(float)
-
     num_train = 1000
     seq_length = 10
 
@@ -198,10 +189,18 @@ if __name__ == '__main__':
     #
     # data_in = data_in.reshape(num_train, seq_length, input_dim)
     # data_out = data_out.reshape(num_train, seq_length)
-
-    data_in, data_out = init.init_input(data, data_str, d.binary_result, output_num=num_train, length=seq_length)
+    data_in, data_out = init.init_input(data, data_str, 17, output_num=num_train, length=seq_length)
     data_in = np.concatenate((data_in[:, d.address:d.time], data_in[:, d.time_interval].reshape(-1, 1)),
                              axis=1)
+    input_dim = data_in.shape[1]
+    for i in range(data_in.shape[0]):
+        for j in range(input_dim):
+            if data_in[i, j] is None:
+                data_in[i, j] = -1.0
+            else:
+                data_in[i, j] = float(data_in[i, j])
+    data_in = data_in.astype(float)
+
     lstm = CaptioningRNN(input_dim, output_dim, hidden_dim=512, cell_type='lstm')
 
     train_data = {}
