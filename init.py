@@ -31,6 +31,7 @@ def init_input(data, data_str, result_pos, output_num=None, length=10):
             add_input = data[pos:pos + length]
             add_output = data_str[pos + 1:pos + length + 1]
             input.append(add_input)
+            output.append(add_output)
             count += 1
             pos += length
     input = np.array(input)
