@@ -6,7 +6,7 @@ from Discretization import *
 from Data import *
 
 
-def init_input(data, data_str, result_pos, output_num=None, length=10):
+def init_input(data, data_str, result, output_num=None, length=10):
     if len(data.shape) > 2:
         raise Exception('unexpected data shape')
     N, _ = data.shape
@@ -18,7 +18,7 @@ def init_input(data, data_str, result_pos, output_num=None, length=10):
         verify = True
         for i in range(length):
             if pos + i < N:
-                if int(data[pos + i, result_pos]) == 1:
+                if int(result[i]) == 1:
                     verify = False
                     pos += i + 1
                     break
