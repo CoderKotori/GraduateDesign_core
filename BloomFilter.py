@@ -83,11 +83,11 @@ class BloomFilter:
                         tn += 1.0
             return tp, tn, fp, fn, count
         elif self.mode is 'verify':
-            data_valid = []
-            for i in range(data.shape[0]):
-                if self._judge(data[i]) is True:
-                    data_valid.append(i)
-            return np.array(data_valid)
+            tmp = data.reshape(-1)
+            verify = True
+            for i in range(tmp.shape[0]):
+                verify = verify and self._judge(tmp[i])
+            return verify
         else:
             print 'this situation can not happen'
 

@@ -43,20 +43,24 @@ def init_input(data, data_str, result, output_num=None, length=10):
     return input, output
 
 
-def signature(data_row, crc, ti, pid, pm, sp):
-    data_row[13] = nearest(pm, data_row[13])
-    data_row[3] = nearest(sp, data_row[3])
-    data_row[14] = nearest(crc, data_row[14])
-    data_row[20] = nearest(ti, data_row[20])
-    data_row[4:9] = nearest_plus(pid, data_row[4:9])
-    data_row = np.append(data_row[:16], data_row[20])
-    sig = ''
-    for i in range(data_row.shape[0]):
-        if 4 <= i <= 8:
-            sig += '$' + str(data_row[i])
-        else:
-            sig += '@' + str(data_row[i])
-    return sig
+def signature(rows, crc, ti, pid, pm, sp):
+    data_row = rows.copy()
+    data_row[:, 13] = nearest(pm, data_row[:, 13])
+    data_row[:, 3] = nearest(sp, data_row[:, 3])
+    data_row[:, 14] = nearest(crc, data_row[:, 14])
+    data_row[:, 20] = nearest(ti, data_row[:, 20])
+    data_row[:, 4:9] = nearest_plus(pid, data_row[:, 4:9])
+    data_row = np.append(data_row[:, :16], data_row[:, 20])
+    data_row_str = []
+    for ii in range(data_row.shape[0]):
+        sig = ''
+        for i in range(data_row.shape[0]):
+            if 4 <= i <= 8:
+                sig += '$' + str(data_row[i])
+            else:
+                sig += '@' + str(data_row[i])
+        data_row_str.append(sig)
+    return np.array(data_row_str)
 
 
 def signature_all(d, crc, ti, pid, pm, sp):

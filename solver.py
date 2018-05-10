@@ -93,6 +93,20 @@ class Solver(object):
                     self.optim_configs[k]['learning_rate'] *= self.lr_decay
         np.save('files/lstm_params', np.array(self.model.params))
 
+    def verify(self, data_verify, features):
+        verify_in = data_verify['verify_in']
+        verify_out = data_verify['verify_out']
+        scores = self.model.loss(verify_in)
+        T = scores.shape[1]
+        for t in range(T):
+            '''top k=5'''
+            index = np.argpartition(scores[0, t], -5)[-5:]
+            prob_result = features[index]
+            if verify_out[0, t] in prob_result:
+                return True
+            else:
+                return False
+
     def test(self, data_test, features):
         test_in = data_test['test_in']
         test_out = data_test['test_out']

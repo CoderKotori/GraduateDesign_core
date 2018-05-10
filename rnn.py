@@ -225,7 +225,7 @@ if __name__ == '__main__':
         data_out[i] = int(pos)
     data_out = data_out.astype(int)
     data_out = data_out.reshape((num_train, seq_length))
-    lstm = CaptioningRNN(input_dim, output_dim, hidden_dim=512, cell_type='lstm')
+    lstm = CaptioningRNN(input_dim, output_dim, hidden_dim=512, cell_type='lstm', load_param='files/lstm_params.npy')
 
     train_data = {}
     train_data['train_in'] = data_in
@@ -238,14 +238,14 @@ if __name__ == '__main__':
                     },
                     lr_decay=0.995,
                     verbose=True, print_every=10)
-    solver.train()
-    import matplotlib.pyplot as plt
-
-    plt.plot(solver.loss_history)
-    plt.xlabel('Iteration')
-    plt.ylabel('Loss')
-    plt.title('Training loss history')
-    plt.show()
+    # solver.train()
+    # import matplotlib.pyplot as plt
+    #
+    # plt.plot(solver.loss_history)
+    # plt.xlabel('Iteration')
+    # plt.ylabel('Loss')
+    # plt.title('Training loss history')
+    # plt.show()
 
     test_data = {}
     test_start = 2000
