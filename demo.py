@@ -43,8 +43,6 @@ if __name__ == '__main__':
     result_grouped = result_grouped[:, 0]
     data_in, data_out = init_input(data, data_str, np.zeros_like(result), output_num=num_train, length=seq_length)
     #  Second: using pre-defined model to discrete data, and generate signature
-    num_train = 1000
-    seq_length = 10
 
     pm = np.load('files/disc_pm.npy')
     sp = np.load('files/disc_setpoint.npy')

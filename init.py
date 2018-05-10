@@ -50,7 +50,7 @@ def signature(rows, crc, ti, pid, pm, sp):
     data_row[:, 14] = nearest(crc, data_row[:, 14])
     data_row[:, 20] = nearest(ti, data_row[:, 20])
     data_row[:, 4:9] = nearest_plus(pid, data_row[:, 4:9])
-    data_row = np.append(data_row[:, :16], data_row[:, 20])
+    data_row = np.concatenate((data_row[:, :16], data_row[:, 20].reshape(-1, 1)), axis=1)
     data_row_str = []
     for ii in range(data_row.shape[0]):
         sig = ''
