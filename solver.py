@@ -91,6 +91,7 @@ class Solver(object):
                 self.epoch += 1
                 for k in self.optim_configs:
                     self.optim_configs[k]['learning_rate'] *= self.lr_decay
+        np.save('files/lstm_params', np.array(self.model.params))
 
     def test(self, data_test, features):
         test_in = data_test['test_in']

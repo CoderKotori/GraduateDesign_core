@@ -16,7 +16,7 @@ class CaptioningRNN(object):
     """
 
     def __init__(self, input_dim=512, output_dim=128,
-                 hidden_dim=128, cell_type='lstm'):
+                 hidden_dim=128, cell_type='lstm', load_param=None):
         """
         Construct a new CaptioningRNN instance.
 
@@ -35,19 +35,22 @@ class CaptioningRNN(object):
 
         self.cell_type = cell_type
         self.params = {}
+        if load_param is not None:
+            params = np.load(load_param)
+            self.params = params.item()
+        else:
+            # Initialize parameters for the RNN
+            dim_mul = {'lstm': 4, 'rnn': 1}[cell_type]
+            self.params['Wx'] = np.random.randn(input_dim, dim_mul * hidden_dim)
+            self.params['Wx'] /= np.sqrt(input_dim)
+            self.params['Wh'] = np.random.randn(hidden_dim, dim_mul * hidden_dim)
+            self.params['Wh'] /= np.sqrt(hidden_dim)
+            self.params['b'] = np.zeros(dim_mul * hidden_dim)
 
-        # Initialize parameters for the RNN
-        dim_mul = {'lstm': 4, 'rnn': 1}[cell_type]
-        self.params['Wx'] = np.random.randn(input_dim, dim_mul * hidden_dim)
-        self.params['Wx'] /= np.sqrt(input_dim)
-        self.params['Wh'] = np.random.randn(hidden_dim, dim_mul * hidden_dim)
-        self.params['Wh'] /= np.sqrt(hidden_dim)
-        self.params['b'] = np.zeros(dim_mul * hidden_dim)
-
-        # Initialize output to vocab weights
-        self.params['W_vocab'] = np.random.randn(hidden_dim, output_dim)
-        self.params['W_vocab'] /= np.sqrt(hidden_dim)
-        self.params['b_vocab'] = np.zeros(output_dim)
+            # Initialize output to vocab weights
+            self.params['W_vocab'] = np.random.randn(hidden_dim, output_dim)
+            self.params['W_vocab'] /= np.sqrt(hidden_dim)
+            self.params['b_vocab'] = np.zeros(output_dim)
 
         # Cast parameters to correct dtype
         for k, v in self.params.iteritems():
@@ -218,7 +221,7 @@ if __name__ == '__main__':
     data_out = data_out.reshape(-1)
     for i in range(data_out.shape[0]):
         pos = np.where(features == data_out[i])[0][0]
-        print i, ',', pos
+        # print i, ',', pos
         data_out[i] = int(pos)
     data_out = data_out.astype(int)
     data_out = data_out.reshape((num_train, seq_length))
@@ -229,7 +232,7 @@ if __name__ == '__main__':
     train_data['train_out'] = data_out
     solver = Solver(lstm, train_data, update_rule='adam',
                     num_epochs=10,
-                    batch_size=1000,
+                    batch_size=100,
                     optim_config={
                         'learning_rate': 5e-3,
                     },
