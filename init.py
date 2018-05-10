@@ -48,17 +48,18 @@ def signature(rows, crc, ti, pid, pm, sp):
     data_row[:, 13] = nearest(pm, data_row[:, 13])
     data_row[:, 3] = nearest(sp, data_row[:, 3])
     data_row[:, 14] = nearest(crc, data_row[:, 14])
-    data_row[:, 20] = nearest(ti, data_row[:, 20])
+    time_interval = nearest(ti, data_row[:, 20])
     data_row[:, 4:9] = nearest_plus(pid, data_row[:, 4:9])
-    data_row = np.concatenate((data_row[:, :16], data_row[:, 20].reshape(-1, 1)), axis=1)
+    data_row = data_row[:, :16]
+    data_row = np.concatenate((data_row, time_interval.reshape(-1, 1)), axis=1)
     data_row_str = []
     for ii in range(data_row.shape[0]):
         sig = ''
-        for i in range(data_row.shape[0]):
+        for i in range(data_row.shape[1]):
             if 4 <= i <= 8:
-                sig += '$' + str(data_row[i])
+                sig += '$' + str(data_row[ii, i])
             else:
-                sig += '@' + str(data_row[i])
+                sig += '@' + str(data_row[ii, i])
         data_row_str.append(sig)
     return np.array(data_row_str)
 
