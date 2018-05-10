@@ -62,16 +62,16 @@ if __name__ == '__main__':
     data_in[:, d.crc_rate] = nearest(crc, data_in[:, d.crc_rate])
     data_in[:, d.time_interval] = nearest(ti, data_in[:, d.time_interval])
     data_in[:, d.gain:d.rate + 1] = nearest_plus(pid, data_in[:, d.gain:d.rate + 1])
-    data_in = np.concatenate((data[:, d.address:d.time], data_in[:, d.time_interval].reshape(-1, 1)),
+    data_in = np.concatenate((data_in[:, d.address:d.time], data_in[:, d.time_interval].reshape(-1, 1)),
                              axis=1)
-    for i in range(data.shape[0]):
-        for j in range(D):
+    for i in range(data_in.shape[0]):
+        for j in range(data_in.shape[1]):
             if data_in[i, j] is None:
                 data_in[i, j] = -1.0
             else:
                 data_in[i, j] = float(data_in[i, j])
     data_in = data_in.astype(float)
-    data_in = data_in.reshape((N, T, D))
+    data_in = data_in.reshape((N, T, -1))
     lstm_in = data_in[:, :-1]
     lstm_out = data_out[:, :-1]
     lstm_out = lstm_out.reshape(-1)
@@ -83,7 +83,7 @@ if __name__ == '__main__':
             pos = pos[0]
         lstm_out[i] = int(pos)
     lstm_out = lstm_out.astype(int)
-    lstm_out = lstm_out.reshape((N, T))
+    lstm_out = lstm_out.reshape((N, -1))
 
     bf = BloomFilter(mode='verify')
     lstm = CaptioningRNN(D, output_dim, hidden_dim=512, cell_type='lstm', load_param='files/lstm_params.npy')
@@ -103,7 +103,7 @@ if __name__ == '__main__':
         #  Third: using pre-trained Bloom Filter to verify data, if normal, go on
         if bf.run(bf_in[i]):
             data_verify = {}
-            data_verify['verify_in'] = lstm_in[i].reshape((1, T, -1))
+            data_verify['verify_in'] = lstm_in[i].reshape((1, T - 1, -1))
             data_verify['verify_out'] = lstm_out.reshape((1, -1))
             if solver.verify(data_verify, features):
                 if result_grouped[i] == 0:
