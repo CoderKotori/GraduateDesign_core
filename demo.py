@@ -104,7 +104,7 @@ if __name__ == '__main__':
         if bf.run(bf_in[i]):
             data_verify = {}
             data_verify['verify_in'] = lstm_in[i].reshape((1, T - 1, -1))
-            data_verify['verify_out'] = lstm_out.reshape((1, -1))
+            data_verify['verify_out'] = lstm_out[i].reshape((1, -1))
             if solver.verify(data_verify, features):
                 if result_grouped[i] == 0:
                     tp += 1
@@ -120,7 +120,7 @@ if __name__ == '__main__':
                 fn += 1
             else:
                 tn += 1
-    count = N
+    count = N + 0.0
     print 'true positive: ', tp / count
     print 'true negative: ', tn / count
     print 'false positive: ', fp / count
