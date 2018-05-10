@@ -61,7 +61,8 @@ def discrete_plus(array, classes, ratio):
 
 
 def nearest(disc, array):
-    min, max = minmax(disc)
+    ddisc = disc[:-1]
+    min, max = minmax(ddisc)
     distance_max = (max - min)/2
     aaaa = array.copy()
     for i in range(aaaa.shape[0]):
@@ -69,7 +70,6 @@ def nearest(disc, array):
         if item is None:
             continue
         else:
-            ddisc = disc[:-1]
             tmp = (ddisc - item) ** 2
             aaaa[i] = ddisc[np.argmin(tmp)]
             dist = aaaa[i] - item

@@ -94,14 +94,18 @@ class BloomFilter:
 
 if __name__ == '__main__':
     from Data import *
-
+    import math
     d = Data()
 
     data_str = np.load('files/data_str.npy')
     features_normal = np.load('files/features_normal.npy')
     result = d.load_data()[:, d.binary_result].astype(int)
-    # bf_train = BloomFilter(mode='train', m=15700, k=8)
-    # bf_train.run(features_normal)
+    n = features_normal.shape[0]
+    p = 0.01
+    m = int(math.ceil(-n * np.log(p) / np.log(2) ** 2))
+    k = int(math.ceil(np.log(2) * m / n))
+    bf_train = BloomFilter(mode='train', m=m, k=k)
+    bf_train.run(features_normal)
     test_start = 5000
     test_end = 10000
     tp, tn, fp, fn, count = BloomFilter(mode='test').run(data_str[test_start:test_end], result[test_start:test_end])

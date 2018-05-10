@@ -1,5 +1,6 @@
 from rnn_layers import *
 import init
+from Discretization import *
 
 
 class CaptioningRNN(object):
@@ -166,6 +167,17 @@ if __name__ == '__main__':
     num_train = 1000
     seq_length = 10
 
+    pm = np.load('files/disc_pm.npy')
+    sp = np.load('files/disc_setpoint.npy')
+    pid = np.load('files/pred_pid.npy')
+    crc = np.load('files/pred_crcrate.npy')
+    ti = np.load('files/pred_timeinterval.npy')
+
+    data[:, d.pressure_measurement] = nearest(pm, data[:, d.pressure_measurement])
+    data[:, d.setpoint] = nearest(sp, data[:, d.setpoint])
+    data[:, d.crc_rate] = nearest(crc, data[:, d.crc_rate])
+    data[:, d.time_interval] = nearest(ti, data[:, d.time_interval])
+    data[:, d.gain:d.rate + 1] = nearest_plus(pid, data[:, d.gain:d.rate + 1])
     data = np.concatenate((data[:, d.address:d.time], data[:, d.time_interval].reshape(-1, 1)),
                           axis=1)
     input_dim = data.shape[1]
@@ -200,8 +212,16 @@ if __name__ == '__main__':
     #
     # data_in = data_in.reshape(num_train, seq_length, input_dim)
     # data_out = data_out.reshape(num_train, seq_length)
-    data_in, data_out = init.init_input(data, data_str, d.load_data()[:, d.binary_result], output_num=num_train, length=seq_length)
-
+    data_in, data_out = init.init_input(data, data_str, d.load_data()[:, d.binary_result].astype(int),
+                                        output_num=num_train,
+                                        length=seq_length)
+    data_out = data_out.reshape(-1)
+    for i in range(data_out.shape[0]):
+        pos = np.where(features == data_out[i])[0][0]
+        print i, ',', pos
+        data_out[i] = int(pos)
+    data_out = data_out.astype(int)
+    data_out = data_out.reshape((num_train, seq_length))
     lstm = CaptioningRNN(input_dim, output_dim, hidden_dim=512, cell_type='lstm')
 
     train_data = {}

@@ -16,17 +16,21 @@ def init_input(data, data_str, result, output_num=None, length=10):
     count = 0
     while pos < N:
         verify = True
-        for i in range(length):
+        for i in range(length + 1):
             if pos + i < N:
-                if int(result[i]) == 1:
+                if int(result[pos + i]) == 1:
                     verify = False
                     pos += i + 1
                     break
+            else:
+                print 'position out of range'
+                return np.array(input), np.array(output)
         if verify:
             if output_num is None:
                 pass
             else:
                 if count >= output_num:
+                    print 'reach the expected count'
                     return np.array(input), np.array(output)
             add_input = data[pos:pos + length]
             add_output = data_str[pos + 1:pos + length + 1]
@@ -77,56 +81,65 @@ def signature_all(d, crc, ti, pid, pm, sp):
 
 
 if __name__ == '__main__':
-    '''import raw file'''
-    PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
-    data_file_path = os.path.join(PROJECT_ROOT, "files/IanArffDataset.arff")
-    data_raw = arff.load(open(data_file_path, 'rb'))
-    print 'import raw file'
-
-    '''initialize data '''
-    data = data_raw['data']
-    data = np.array(data)
-    print 'initialize data'
-
-    '''add time interval as a new row'''
-    time_interval = []
-    for i in range(data.shape[0]):
-        if i == 0:
-            time_interval.append(0)
-        else:
-            delta = data[i, 16] - data[i - 1, 16]
-            time_interval.append(delta)
-    ti = np.array(time_interval)
-    data = np.column_stack((data, time_interval))
-    np.save('files/data.npy', data)
-    print 'add time interval as a new row'
-
+    # '''import raw file'''
+    # PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
+    # data_file_path = os.path.join(PROJECT_ROOT, "files/IanArffDataset.arff")
+    # data_raw = arff.load(open(data_file_path, 'rb'))
+    # print 'import raw file'
+    #
+    # '''initialize data '''
+    # data = data_raw['data']
+    # data = np.array(data)
+    # print 'initialize data'
+    #
+    # '''add time interval as a new row'''
+    # time_interval = []
+    # for i in range(data.shape[0]):
+    #     if i == 0:
+    #         time_interval.append(0)
+    #     else:
+    #         delta = data[i, 16] - data[i - 1, 16]
+    #         time_interval.append(delta)
+    # ti = np.array(time_interval)
+    # data = np.column_stack((data, time_interval))
+    # np.save('files/data.npy', data)
+    # print 'add time interval as a new row'
+    #
     d = Data()
     data = d.load_data()
-    assert False
-    '''discrete the following features'''
-    time_interval = data[:, d.time_interval].reshape(data.shape[0], 1)
-    kmeans_ti = Kmeans(time_interval, None, k=2)
-    kmeans_ti.calc('files/pred_timeinterval.npy', 20, 2000)
-    print 'time interval done'
+    # assert False
+    # '''discrete the following features'''
+    # time_interval = data[:, d.time_interval].reshape(data.shape[0], 1)
+    # kmeans_ti = Kmeans(time_interval, None, k=2)
+    # kmeans_ti.calc('files/pred_timeinterval.npy', 20, 2000)
+    # print 'time interval done'
+    #
+    # crc_rate = data[:, d.crc_rate].reshape(data.shape[0], 1)
+    # kmeans_cr = Kmeans(crc_rate, None, k=2)
+    # kmeans_cr.calc('files/pred_crcrate.npy', 20, 200)
+    # print 'crc rate done'
 
-    crc_rate = data[:, d.crc_rate].reshape(data.shape[0], 1)
-    kmeans_cr = Kmeans(crc_rate, None, k=2)
-    kmeans_cr.calc('files/pred_crcrate.npy', 20, 200)
-    print 'crc rate done'
+    # pid = data[:, d.gain:d.rate + 1]
+    # kmeans_pid = Kmeans(pid, None, k=32)
+    # kmeans_pid.calc('files/pred_pid.npy', 20, 2000)
+    # print 'pid done'
+    #
+    # pressure_measurement = data[:, d.pressure_measurement]
+    # setpoint = data[:, d.setpoint]
+    # disc_pm = discrete_plus(pressure_measurement, 20, 0.95)
+    # disc_sp = discrete_plus(setpoint, 10, 0.95)
+    # np.save('files/disc_pm.npy', disc_pm)
+    # np.save('files/disc_setpoint.mpy', disc_sp)
+    # print 'pressure measurement and  setpoint done'
 
-    pid = data[:, d.gain:d.rate + 1]
-    kmeans_pid = Kmeans(pid, None, k=32)
-    kmeans_pid.calc('files/pred_pid.npy', 20, 2000)
-    print 'pid done'
-
-    pressure_measurement = data[:, d.pressure_measurement]
-    setpoint = data[:, d.setpoint]
-    disc_pm = discrete(pressure_measurement, 20)
-    disc_sp = discrete(setpoint, 10)
-    np.save('files/disc_pm.npy', disc_pm)
-    np.save('files/disc_setpoint.mpy', disc_sp)
-    print 'pressure measurement and  setpoint done'
+    # crc = np.load('files/pred_crcrate.npy')
+    # crc.sort()
+    # np.append(crc, 2 * crc[-1] - crc[0])
+    # ti = np.load('files/pred_timeinterval.npy')
+    # ti.sort()
+    # np.append(ti, 2 * ti[-1] - ti[0])
+    # np.save(ti, 'files/pred_timeinterval.npy')
+    # np.save(crc, 'files/pred_crcrate.npy')
 
     pm = np.load('files/disc_pm.npy')
     setpoint = np.load('files/disc_setpoint.npy')
