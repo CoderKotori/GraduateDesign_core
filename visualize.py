@@ -85,13 +85,13 @@ for i in range(data.shape[0]):
 # plt.show()
 # print 'set point done'
 
-pca = PCA(n_components=3)
-new_pid = pca.fit_transform(pid)
-x = new_pid[:, 0]
-y = new_pid[:, 1]
-z = new_pid[:, 2]
-with open('pid.json', 'w') as f:
-    json.dump(new_pid.tolist(), f)
+# pca = PCA(n_components=3)
+# new_pid = pca.fit_transform(pid)
+# x = new_pid[:, 0]
+# y = new_pid[:, 1]
+# z = new_pid[:, 2]
+# with open('pid.json', 'w') as f:
+#     json.dump(new_pid.tolist(), f)
 
 # ax = plt.subplot(111, projection='3d')
 # color = np.random.rand(x.shape[0])
@@ -101,13 +101,13 @@ with open('pid.json', 'w') as f:
 # plt.show()
 
 
-# test_result = np.load('files/disc_result.npy')
-# pid = test_result[:, 0]
-# pm = test_result[:, 1]
-# sp = test_result[:, 2]
-# res = test_result[:, 5]
-# res = (res - np.min(res)) / (np.max(res) - np.min(res))
-# ax = plt.subplot(111, projection='3d')
-# aa = ax.scatter(pid, pm, sp, marker='.', c=res)
-# plt.colorbar(aa)
-# plt.show()
+test_result = np.load('files/disc_result.npy')
+pid = test_result[:, 0]
+pm = test_result[:, 1]
+sp = test_result[:, 2]
+res = test_result[:, 5]
+res = (res - np.min(res)) / (np.max(res) - np.min(res))
+ax = plt.subplot(111, projection='3d')
+aa = ax.scatter(pid, pm, sp, marker='.', c=res)
+plt.colorbar(aa)
+plt.show()
