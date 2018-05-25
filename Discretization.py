@@ -63,7 +63,7 @@ def discrete_plus(array, classes, ratio):
 def nearest(disc, array):
     ddisc = disc[:-1]
     min, max = minmax(ddisc)
-    distance_max = (max - min)/2
+    distance_max = (max - min) / 2
     aaaa = array.copy()
     for i in range(aaaa.shape[0]):
         item = aaaa[i]
@@ -105,6 +105,7 @@ if __name__ == '__main__':
     from BloomFilter import *
     import math
     import time
+
     # optimize the granularity of discretization
     d = Data()
     data = d.load_data()
@@ -114,22 +115,26 @@ if __name__ == '__main__':
     setpoint = data[:, d.setpoint]
 
     crc = np.load('files/pred_crcrate.npy')
-    crc.sort()
-    np.append(crc, 2 * crc[-1] - crc[0])
+    # crc.sort(axis=0)
+    # crc = np.append(crc, 2 * crc[-1] - crc[0])
     ti = np.load('files/pred_timeinterval.npy')
-    ti.sort()
-    np.append(ti, 2 * ti[-1] - ti[0])
+    # ti.sort(axis=0)
+    # ti = np.append(ti, 2 * ti[-1] - ti[0])
+    #
+    # np.save('files/pred_crcrate.npy', crc)
+    # np.save('files/pred_timeinterval.npy', ti)
+    # assert False
     result = d.load_data()[:, d.binary_result].astype(int)
 
     disc_result = []
-    for i in range(10, 50, 5):
+    for i in range(10, 50, 10):
         print 'pid'
         kmeans_pid = Kmeans(raw_pid, None, k=i)
         pid = kmeans_pid.calc(None, 20, 2000)
-        for j in range(2, 30, 2):
+        for j in range(10, 50, 5):
             print 'pressure measurement'
             pm = discrete_plus(pressure_measurement, j, 0.9)
-            for k in range(2, 30, 2):
+            for k in range(10, 50, 5):
                 # before = time.time()
                 print 'set point'
                 sp = discrete_plus(setpoint, k, 0.9)
@@ -145,7 +150,7 @@ if __name__ == '__main__':
 
                 n = features_normal.shape[0]
                 p = 0.01
-                m = int(math.ceil(-n * np.log(p) / np.log(2)**2))
+                m = int(math.ceil(-n * np.log(p) / np.log(2) ** 2))
                 kk = int(math.ceil(np.log(2) * m / n))
                 bf_train = BloomFilter(mode='train', m=m, k=kk)
                 bf_train.run(features_normal)
@@ -153,12 +158,14 @@ if __name__ == '__main__':
                 test_end = 15000
                 bf_train.mode = 'test'
                 tp, tn, fp, fn, count = bf_train.run(data_str[test_start:test_end],
-                                                                     result[test_start:test_end])
-                disc_result.append([i, j, k, tp, tn, fp, fn])
+                                                     result[test_start:test_end])
+                disc_result.append([i, j, k, m, kk, tp, tn, fp, fn])
                 print 'number of pid: ', i
                 print 'number of pressure measurement: ', j
                 print 'number of set point: ', k
-                print 'number of normal features and all :', n, ' ', data_str.shape[0]
+                print 'number of normal features: ', n
+                print 'length of bit array: ', m
+                print 'number of hash functions: ', kk
                 print 'true positive: ', tp / count
                 print 'true negative: ', tn / count
                 print 'false positive: ', fp / count

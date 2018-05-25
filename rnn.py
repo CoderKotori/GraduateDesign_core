@@ -184,14 +184,16 @@ if __name__ == '__main__':
     data = np.concatenate((data[:, d.address:d.time], data[:, d.time_interval].reshape(-1, 1)),
                           axis=1)
     input_dim = data.shape[1]
-    for i in range(data.shape[0]):
-        for j in range(input_dim):
-            if data[i, j] is None:
+    data = data.astype(float)
+    for j in range(input_dim):
+        min, max = np.nanmin(data[:, j]), np.nanmax(data[:, j])
+        print min, max
+        for i in range(data.shape[0]):
+            if np.isnan(data[i, j]):
                 data[i, j] = -1.0
             else:
-                data[i, j] = float(data[i, j])
-    data = data.astype(float)
-
+                data[i, j] = (data[i, j] - min)/(max - min)
+    assert False
     # data_in = np.zeros((num_train * seq_length, input_dim))
     # data_out = np.zeros((num_train * seq_length)).astype(object)
     # num = 0

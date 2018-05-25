@@ -130,11 +130,11 @@ if __name__ == '__main__':
     # print 'pid done'
     #
     # pressure_measurement = data[:, d.pressure_measurement]
-    # setpoint = data[:, d.setpoint]
+    setpoint = data[:, d.setpoint]
     # disc_pm = discrete_plus(pressure_measurement, 20, 0.95)
-    # disc_sp = discrete_plus(setpoint, 10, 0.95)
+    disc_sp = discrete_plus(setpoint, 10, 0.95)
     # np.save('files/disc_pm.npy', disc_pm)
-    # np.save('files/disc_setpoint.mpy', disc_sp)
+    np.save('files/disc_setpoint.npy', disc_sp)
     # print 'pressure measurement and  setpoint done'
 
     # crc = np.load('files/pred_crcrate.npy')
@@ -151,6 +151,7 @@ if __name__ == '__main__':
     crc_rate = np.load('files/pred_crcrate.npy')
     pid = np.load('files/pred_pid.npy')
     ti = np.load('files/pred_timeinterval.npy')
+    assert False
     # data[:, d.pressure_measurement] = nearest(pm, data[:, d.pressure_measurement])
     # data[:, d.setpoint] = nearest(setpoint, data[:, d.setpoint])
     # data[:, d.crc_rate] = nearest(crc_rate, data[:, d.crc_rate])

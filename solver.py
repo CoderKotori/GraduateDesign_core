@@ -125,12 +125,12 @@ class Solver(object):
                 prob_result = features[index]
                 if test_out[i, t] in prob_result:
                     if test_result[i, t] == 0:
-                        tp += 1.0
+                        tn += 1.0
                     else:
-                        fp += 1.0
+                        fn += 1.0
                 else:
                     if test_result[i, t] == 0:
-                        fn += 1.0
+                        fp += 1.0
                     else:
-                        tn += 1.0
+                        tp += 1.0
         return tp, tn, fp, fn, count

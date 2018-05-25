@@ -73,14 +73,14 @@ class BloomFilter:
                 if self._judge(data[j]) is True:
 
                     if result[j] == 0:
-                        tp += 1.0
+                        tn += 1.0
                     else:
-                        fp += 1.0
+                        fn += 1.0
                 else:
                     if result[j] == 0:
-                        fn += 1.0
+                        fp += 1.0
                     else:
-                        tn += 1.0
+                        tp += 1.0
             return tp, tn, fp, fn, count
         elif self.mode is 'verify':
             tmp = data.reshape(-1)
@@ -106,10 +106,10 @@ if __name__ == '__main__':
     # k = int(math.ceil(np.log(2) * m / n))
     # bf_train = BloomFilter(mode='train', m=m, k=k)
     # bf_train.run(features_normal)
-    test_start = 5000
-    test_end = 10000
+    test_start = 0
+    test_end = 200000
     tp, tn, fp, fn, count = BloomFilter(mode='test').run(data_str[test_start:test_end], result[test_start:test_end])
-    print 'true positive: ', tp / count
-    print 'true negative: ', tn / count
-    print 'false positive: ', fp / count
-    print 'false negative: ', fn / count
+    print 'true positive: ', tp
+    print 'true negative: ', tn
+    print 'false positive: ', fp
+    print 'false negative: ', fn
