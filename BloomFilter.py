@@ -100,12 +100,12 @@ if __name__ == '__main__':
     data_str = np.load('files/data_str.npy')
     features_normal = np.load('files/features_normal.npy')
     result = d.load_data()[:, d.binary_result].astype(int)
-    # n = features_normal.shape[0]
-    # p = 0.01
-    # m = int(math.ceil(-n * np.log(p) / np.log(2) ** 2))
-    # k = int(math.ceil(np.log(2) * m / n))
-    # bf_train = BloomFilter(mode='train', m=m, k=k)
-    # bf_train.run(features_normal)
+    n = features_normal.shape[0]
+    p = 0.01
+    m = int(math.ceil(-n * np.log(p) / np.log(2) ** 2))
+    k = int(math.ceil(np.log(2) * m / n))
+    bf_train = BloomFilter(mode='train', m=m, k=k)
+    bf_train.run(features_normal)
     test_start = 0
     test_end = 200000
     tp, tn, fp, fn, count = BloomFilter(mode='test').run(data_str[test_start:test_end], result[test_start:test_end])

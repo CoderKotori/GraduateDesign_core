@@ -101,30 +101,30 @@ if __name__ == '__main__':
     fn = 0
     for i in range(N):
         #  Third: using pre-trained Bloom Filter to verify data, if normal, go on
-        if bf.run(bf_in[i]):
+        # if bf.run(bf_in[i]):
             data_verify = {}
             data_verify['verify_in'] = lstm_in[i].reshape((1, T - 1, -1))
             data_verify['verify_out'] = lstm_out[i].reshape((1, -1))
             if solver.verify(data_verify, features):
                 if result_grouped[i] == 0:
-                    tn += 1
+                    tn += 1.0
                 else:
-                    fn += 1
+                    fn += 1.0
             else:
                 if result_grouped[i] == 0:
-                    fp += 1
+                    fp += 1.0
                 else:
-                    tp += 1
-        else:
-            if result_grouped[i] == 0:
-                fp += 1
-            else:
-                tp += 1
+                    tp += 1.0
+        # else:
+        #     if result_grouped[i] == 0:
+        #         fp += 1.0
+        #     else:
+        #         tp += 1.0
     count = N + 0.0
-    print 'true positive: ', tp
-    print 'true negative: ', tn
-    print 'false positive: ', fp
-    print 'false negative: ', fn
+    print 'true positive: ', tp/count
+    print 'true negative: ', tn/count
+    print 'false positive: ', fp/count
+    print 'false negative: ', fn/count
     # Forth: using pre-trained LSTM network to verify data, return the result
 
     #  Fifth(optional): compare the calculated result with the true result, count tp, tn, fp, fn

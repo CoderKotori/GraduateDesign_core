@@ -193,7 +193,7 @@ if __name__ == '__main__':
                 data[i, j] = -1.0
             else:
                 data[i, j] = (data[i, j] - min)/(max - min)
-    assert False
+
     # data_in = np.zeros((num_train * seq_length, input_dim))
     # data_out = np.zeros((num_train * seq_length)).astype(object)
     # num = 0
