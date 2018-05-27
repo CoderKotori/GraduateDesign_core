@@ -159,7 +159,7 @@ if __name__ == '__main__':
                 bf_train.mode = 'test'
                 tp, tn, fp, fn, count = bf_train.run(data_str[test_start:test_end],
                                                      result[test_start:test_end])
-                disc_result.append([i, j, k, m, kk, tp, tn, fp, fn])
+                disc_result.append([i, j, k, n, m, kk, tp, tn, fp, fn])
                 print 'number of pid: ', i
                 print 'number of pressure measurement: ', j
                 print 'number of set point: ', k

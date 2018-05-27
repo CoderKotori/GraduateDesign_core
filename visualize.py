@@ -105,8 +105,8 @@ test_result = np.load('files/disc_result.npy')
 pid = test_result[:, 0]
 pm = test_result[:, 1]
 sp = test_result[:, 2]
-res = test_result[:, 3]
-# res = test_result[:, 5]/(test_result[:, 5] + test_result[:, 8])
+# res = test_result[:, 3]
+res = test_result[:, 5]/(test_result[:, 5] + test_result[:, 8])
 # res = (res - np.min(res)) / (np.max(res) - np.min(res))
 ax = plt.subplot(111, projection='3d')
 aa = ax.scatter(pid, pm, sp, marker='.', c=res)

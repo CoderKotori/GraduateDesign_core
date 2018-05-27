@@ -101,25 +101,25 @@ if __name__ == '__main__':
     fn = 0
     for i in range(N):
         #  Third: using pre-trained Bloom Filter to verify data, if normal, go on
-        # if bf.run(bf_in[i]):
-            data_verify = {}
-            data_verify['verify_in'] = lstm_in[i].reshape((1, T - 1, -1))
-            data_verify['verify_out'] = lstm_out[i].reshape((1, -1))
-            if solver.verify(data_verify, features):
+        if bf.run(bf_in[i]):
+            # data_verify = {}
+            # data_verify['verify_in'] = lstm_in[i].reshape((1, T - 1, -1))
+            # data_verify['verify_out'] = lstm_out[i].reshape((1, -1))
+            # if solver.verify(data_verify, features):
                 if result_grouped[i] == 0:
                     tn += 1.0
                 else:
                     fn += 1.0
+            # else:
+            #     if result_grouped[i] == 0:
+            #         fp += 1.0
+            #     else:
+            #         tp += 1.0
+        else:
+            if result_grouped[i] == 0:
+                fp += 1.0
             else:
-                if result_grouped[i] == 0:
-                    fp += 1.0
-                else:
-                    tp += 1.0
-        # else:
-        #     if result_grouped[i] == 0:
-        #         fp += 1.0
-        #     else:
-        #         tp += 1.0
+                tp += 1.0
     count = N + 0.0
     print 'true positive: ', tp/count
     print 'true negative: ', tn/count

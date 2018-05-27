@@ -104,8 +104,8 @@ if __name__ == '__main__':
     p = 0.01
     m = int(math.ceil(-n * np.log(p) / np.log(2) ** 2))
     k = int(math.ceil(np.log(2) * m / n))
-    bf_train = BloomFilter(mode='train', m=m, k=k)
-    bf_train.run(features_normal)
+    # bf_train = BloomFilter(mode='train', m=m, k=k)
+    # bf_train.run(features_normal)
     test_start = 0
     test_end = 200000
     tp, tn, fp, fn, count = BloomFilter(mode='test').run(data_str[test_start:test_end], result[test_start:test_end])
