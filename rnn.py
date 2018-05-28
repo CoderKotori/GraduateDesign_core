@@ -47,6 +47,11 @@ class CaptioningRNN(object):
             self.params['Wh'] /= np.sqrt(hidden_dim)
             self.params['b'] = np.zeros(dim_mul * hidden_dim)
 
+            self.params['Wx2'] = np.random.randn(hidden_dim, dim_mul * hidden_dim)
+            self.params['Wx2'] /= np.sqrt(hidden_dim)
+            self.params['Wh2'] = np.random.randn(hidden_dim, dim_mul * hidden_dim)
+            self.params['Wh2'] /= np.sqrt(hidden_dim)
+            self.params['b2'] = np.zeros(dim_mul * hidden_dim)
             # Initialize output to vocab weights
             self.params['W_vocab'] = np.random.randn(hidden_dim, output_dim)
             self.params['W_vocab'] /= np.sqrt(hidden_dim)
@@ -86,7 +91,7 @@ class CaptioningRNN(object):
 
         # Input-to-hidden, hidden-to-hidden, and biases for the RNN
         Wx, Wh, b = self.params['Wx'], self.params['Wh'], self.params['b']
-
+        Wx2, Wh2, b2 = self.params['Wx2'], self.params['Wh2'], self.params['b2']
         # Weight and bias for the hidden-to-vocab transformation.
         W_vocab, b_vocab = self.params['W_vocab'], self.params['b_vocab']
 
@@ -114,6 +119,7 @@ class CaptioningRNN(object):
         ############################################################################
         '''first step: compute the initial hidden state h0'''
         h0 = np.zeros((data_in.shape[0], Wh.shape[0]))
+        h02 = np.zeros((data_in.shape[0], Wh2.shape[0]))
         # print h0.shape
         '''second step: use a word embedding layer to transform the words in captions_in'''
         # captions_in_embedding, emb_cahce = word_embedding_forward(captions_in, W_embed)
@@ -121,11 +127,13 @@ class CaptioningRNN(object):
         if self.cell_type == 'rnn':
             h, h_cache = rnn_forward(data_in, h0, Wx, Wh, b)
         elif self.cell_type == 'lstm':
-            h, h_cache = lstm_forward(data_in, h0, Wx, Wh, b)
+            # notice: here changed
+            h1, h1_cache = lstm_forward(data_in, h0, Wx, Wh, b)
+            h2, h2_cache = lstm_forward(h1, h02, Wx2, Wh2, b2)
         else:
             raise ValueError('Invalid cell type: "%s"', self.cell_type)
         '''forth step: use wx+b tp compute scores'''
-        scores, score_cache = temporal_affine_forward(h, W_vocab, b_vocab)
+        scores, score_cache = temporal_affine_forward(h2, W_vocab, b_vocab)
         if data_out is None:
             return scores
         '''fifth step: use softmax'''
@@ -136,7 +144,8 @@ class CaptioningRNN(object):
         if self.cell_type == 'rnn':
             dcaption, dh0, grads['Wx'], grads['Wh'], grads['b'] = rnn_backward(dscores, h_cache)
         elif self.cell_type == 'lstm':
-            dcaption, dh0, grads['Wx'], grads['Wh'], grads['b'] = lstm_backward(dscores, h_cache)
+            dh2, dh02, grads['Wx2'], grads['Wh2'], grads['b2'] = lstm_backward(dscores, h2_cache)
+            din, dh0, grads['Wx'], grads['Wh'], grads['b'] = lstm_backward(dh2, h1_cache)
         else:
             raise ValueError('Invalid cell type: "%s"', self.cell_type)
         ############################################################################
@@ -187,7 +196,7 @@ if __name__ == '__main__':
     data = data.astype(float)
     for j in range(input_dim):
         min, max = np.nanmin(data[:, j]), np.nanmax(data[:, j])
-        print min, max
+        # print min, max
         for i in range(data.shape[0]):
             if np.isnan(data[i, j]):
                 data[i, j] = -1.0
@@ -227,7 +236,7 @@ if __name__ == '__main__':
         data_out[i] = int(pos)
     data_out = data_out.astype(int)
     data_out = data_out.reshape((num_train, seq_length))
-    lstm = CaptioningRNN(input_dim, output_dim, hidden_dim=512, cell_type='lstm', load_param='files/lstm_params.npy')
+    lstm = CaptioningRNN(input_dim, output_dim, hidden_dim=1024, cell_type='lstm')
 
     train_data = {}
     train_data['train_in'] = data_in
@@ -240,7 +249,7 @@ if __name__ == '__main__':
                     },
                     lr_decay=0.995,
                     verbose=True, print_every=10)
-    # solver.train()
+    solver.train()
     # import matplotlib.pyplot as plt
     #
     # plt.plot(solver.loss_history)

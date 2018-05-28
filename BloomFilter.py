@@ -71,7 +71,6 @@ class BloomFilter:
                 raise Exception('data not match')
             for j in range(count):
                 if self._judge(data[j]) is True:
-
                     if result[j] == 0:
                         tn += 1.0
                     else:
