@@ -1,6 +1,7 @@
 from rnn_layers import *
 import init
 from Discretization import *
+import matplotlib.pyplot as plt
 
 
 class CaptioningRNN(object):
@@ -176,7 +177,7 @@ if __name__ == '__main__':
     d = Data()
     data = d.load_data()
 
-    num_train = 1000
+    num_train = 10000
     seq_length = 10
 
     pm = np.load('files/disc_pm.npy')
@@ -201,7 +202,7 @@ if __name__ == '__main__':
             if np.isnan(data[i, j]):
                 data[i, j] = -1.0
             else:
-                data[i, j] = (data[i, j] - min)/(max - min)
+                data[i, j] = (data[i, j] - min) / (max - min)
 
     # data_in = np.zeros((num_train * seq_length, input_dim))
     # data_out = np.zeros((num_train * seq_length)).astype(object)
@@ -236,27 +237,30 @@ if __name__ == '__main__':
         data_out[i] = int(pos)
     data_out = data_out.astype(int)
     data_out = data_out.reshape((num_train, seq_length))
-    lstm = CaptioningRNN(input_dim, output_dim, hidden_dim=1024, cell_type='lstm')
+    for i in range(num_train / 100):
+        if i == 0:
+            params_path = None
+        else:
+            params_path = 'files/lstm_params.npy'
+        lstm = CaptioningRNN(input_dim, output_dim, hidden_dim=3096, cell_type='lstm', load_param=params_path)
 
-    train_data = {}
-    train_data['train_in'] = data_in
-    train_data['train_out'] = data_out
-    solver = Solver(lstm, train_data, update_rule='adam',
-                    num_epochs=10,
-                    batch_size=100,
-                    optim_config={
-                        'learning_rate': 5e-3,
-                    },
-                    lr_decay=0.995,
-                    verbose=True, print_every=10)
-    solver.train()
-    # import matplotlib.pyplot as plt
-    #
-    # plt.plot(solver.loss_history)
-    # plt.xlabel('Iteration')
-    # plt.ylabel('Loss')
-    # plt.title('Training loss history')
-    # plt.show()
+        train_data = {}
+        train_data['train_in'] = data_in[100 * i:100 * (1 + 1)]
+        train_data['train_out'] = data_out[100 * i:100 * (1 + 1)]
+        solver = Solver(lstm, train_data, update_rule='adam',
+                        num_epochs=10,
+                        batch_size=100,
+                        optim_config={
+                            'learning_rate': 5e-3,
+                        },
+                        lr_decay=0.995,
+                        verbose=True, print_every=10)
+        solver.train()
+        plt.plot(solver.loss_history)
+        plt.xlabel('Iteration')
+        plt.ylabel('Loss')
+        plt.title('Training loss history')
+        plt.show()
 
     test_data = {}
     test_start = 2000
