@@ -245,8 +245,8 @@ if __name__ == '__main__':
         lstm = CaptioningRNN(input_dim, output_dim, hidden_dim=3096, cell_type='lstm', load_param=params_path)
 
         train_data = {}
-        train_data['train_in'] = data_in[100 * i:100 * (1 + 1)]
-        train_data['train_out'] = data_out[100 * i:100 * (1 + 1)]
+        train_data['train_in'] = data_in[100 * i:100 * (1 + i)]
+        train_data['train_out'] = data_out[100 * i:100 * (1 + i)]
         solver = Solver(lstm, train_data, update_rule='adam',
                         num_epochs=10,
                         batch_size=100,

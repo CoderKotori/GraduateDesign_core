@@ -151,6 +151,7 @@ if __name__ == '__main__':
     crc_rate = np.load('files/pred_crcrate.npy')
     pid = np.load('files/pred_pid.npy')
     ti = np.load('files/pred_timeinterval.npy')
+    assert False
     # assert False
     # data[:, d.pressure_measurement] = nearest(pm, data[:, d.pressure_measurement])
     # data[:, d.setpoint] = nearest(setpoint, data[:, d.setpoint])
