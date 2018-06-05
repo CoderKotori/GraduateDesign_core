@@ -121,6 +121,14 @@ def get_pid():
     return json_pid
 
 
+def get_result():
+    with open('disc_result.json', 'r') as f:
+        result = json.load(f)
+    print 'get discretization result'
+    json_result = json.dumps(result)
+    return json_result
+
+
 if __name__ == "__main__":
     r = RPCServer('0.0.0.0', '8061')
-    r.service([get_ti, get_crc, get_sp, get_pm, get_pid])
+    r.service([get_ti, get_crc, get_sp, get_pm, get_pid, get_result])

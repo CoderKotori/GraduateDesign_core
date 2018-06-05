@@ -43,6 +43,49 @@ def init_input(data, data_str, result, output_num=None, length=10):
     return input, output
 
 
+def signature_generator(data):
+    pass
+
+
+def lstm_input(data, data_str, result, output_num=None, length=2):
+    if len(data.shape) > 2:
+        raise Exception('unexpected data shape')
+    N, _ = data.shape
+    pos = 0
+    input = []
+    output = []
+    count = 0
+    result_group = []
+    while pos < N:
+        verify = True
+        for i in range(length):
+            if pos + i < N:
+                if int(result[pos + i]) == 1:
+                    verify = False
+                    pos += i + 1
+                    break
+            else:
+                print 'position out of range'
+                return np.array(input), np.array(output), np.array(result_group)
+        if verify:
+            if output_num is None:
+                pass
+            else:
+                if count >= output_num:
+                    print 'reach the expected count'
+                    return np.array(input), np.array(output), np.array(result_group)
+            add_input = data[pos:pos + length]
+            add_output = data_str[pos + 1:pos + length + 1]
+            input.append(add_input)
+            output.append(add_output)
+            result_group.append(result[pos + length + 1])
+            count += 1
+            pos += length
+    input = np.array(input)
+    output = np.array(output)
+    return input, output, result_group
+
+
 def signature(rows, crc, ti, pid, pm, sp):
     data_row = rows.copy()
     data_row[:, 13] = nearest(pm, data_row[:, 13])
@@ -151,7 +194,7 @@ if __name__ == '__main__':
     crc_rate = np.load('files/pred_crcrate.npy')
     pid = np.load('files/pred_pid.npy')
     ti = np.load('files/pred_timeinterval.npy')
-    assert False
+
     # assert False
     # data[:, d.pressure_measurement] = nearest(pm, data[:, d.pressure_measurement])
     # data[:, d.setpoint] = nearest(setpoint, data[:, d.setpoint])
@@ -163,7 +206,7 @@ if __name__ == '__main__':
 
     '''generate signature'''
     data_str = signature_all(d, crc_rate, ti, pid, pm, setpoint)
-    np.save('files/data_str.npy', data_str)
+    # np.save('files/data_str.npy', data_str)
     print 'generate signature'
 
     '''
@@ -178,7 +221,7 @@ if __name__ == '__main__':
         else:
             if data_str[i] not in features:
                 features.append(data_str[i])
-    np.save('files/features.npy', features)
+    # np.save('files/features.npy', features)
     print 'save all features'
 
     '''
@@ -196,5 +239,5 @@ if __name__ == '__main__':
                 if data_str[i] not in features_normal:
                     features_normal.append(data_str[i])
     features_normal = np.array(features_normal)
-    np.save('files/features_normal.npy', features_normal)
+    # np.save('files/features_normal.npy', features_normal)
     print 'save normal features'

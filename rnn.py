@@ -155,15 +155,24 @@ class CaptioningRNN(object):
 
         return loss, grads
 
-    def verify(self, data_in, data_out=None, k=5):
-        scores = self.loss(data_in)
+    def verify(self, data_in, prev_h1, prev_c1, prev_h2, prev_c2, k=5):
+        # Input-to-hidden, hidden-to-hidden, and biases for the RNN
+        Wx, Wh, b = self.params['Wx'], self.params['Wh'], self.params['b']
+        Wx2, Wh2, b2 = self.params['Wx2'], self.params['Wh2'], self.params['b2']
+        # Weight and bias for the hidden-to-vocab transformation.
+        W_vocab, b_vocab = self.params['W_vocab'], self.params['b_vocab']
+        next_h1, next_c1, _ = lstm_step_forward(data_in, prev_h1, prev_c1, Wx, Wh, b)
+        next_h2, next_c2, _ = lstm_step_forward(next_h1, prev_h2, prev_c2, Wx2, Wh2, b2)
+        scores = temporal_affine_forward(next_h2, W_vocab, b_vocab)
         N, T, _ = scores.shape
         for i in range(N):
             for t in range(T):
                 index = np.argpartition(scores[i, t], -k)[-k:]
                 prob_result = features[index]
                 if test_out[i, t] in prob_result:
-                    pass
+                    return True
+                else:
+                    return False
 
 
 if __name__ == '__main__':
@@ -227,55 +236,63 @@ if __name__ == '__main__':
     #
     # data_in = data_in.reshape(num_train, seq_length, input_dim)
     # data_out = data_out.reshape(num_train, seq_length)
-    data_in, data_out = init.init_input(data, data_str, d.load_data()[:, d.binary_result].astype(int),
-                                        output_num=num_train,
-                                        length=seq_length)
-    data_out = data_out.reshape(-1)
-    for i in range(data_out.shape[0]):
-        pos = np.where(features == data_out[i])[0][0]
-        # print i, ',', pos
-        data_out[i] = int(pos)
-    data_out = data_out.astype(int)
-    data_out = data_out.reshape((num_train, seq_length))
-    for i in range(num_train / 100):
-        if i == 0:
-            params_path = None
-        else:
-            params_path = 'files/lstm_params.npy'
-        lstm = CaptioningRNN(input_dim, output_dim, hidden_dim=3096, cell_type='lstm', load_param=params_path)
 
-        train_data = {}
-        train_data['train_in'] = data_in[100 * i:100 * (1 + i)]
-        train_data['train_out'] = data_out[100 * i:100 * (1 + i)]
-        solver = Solver(lstm, train_data, update_rule='adam',
-                        num_epochs=10,
-                        batch_size=100,
-                        optim_config={
-                            'learning_rate': 5e-3,
-                        },
-                        lr_decay=0.995,
-                        verbose=True, print_every=10)
-        solver.train()
-        plt.plot(solver.loss_history)
-        plt.xlabel('Iteration')
-        plt.ylabel('Loss')
-        plt.title('Training loss history')
-        plt.show()
+    # data_in, data_out = init.init_input(data, data_str, d.load_data()[:, d.binary_result].astype(int),
+    #                                     output_num=num_train,
+    #                                     length=seq_length)
+    # data_out = data_out.reshape(-1)
+    # for i in range(data_out.shape[0]):
+    #     pos = np.where(features == data_out[i])[0][0]
+    #     # print i, ',', pos
+    #     data_out[i] = int(pos)
+    # data_out = data_out.astype(int)
+    # data_out = data_out.reshape((num_train, seq_length))
 
+    # for i in range(num_train / 100):
+    #     if i == 0:
+    #         params_path = None
+    #     else:
+    #         params_path = 'files/lstm_params.npy'
+    #     lstm = CaptioningRNN(input_dim, output_dim, hidden_dim=3096, cell_type='lstm', load_param=params_path)
+    #
+    #     train_data = {}
+    #     train_data['train_in'] = data_in[100 * i:100 * (1 + i)]
+    #     train_data['train_out'] = data_out[100 * i:100 * (1 + i)]
+    #     solver = Solver(lstm, train_data, update_rule='adam',
+    #                     num_epochs=10,
+    #                     batch_size=100,
+    #                     optim_config={
+    #                         'learning_rate': 5e-3,
+    #                     },
+    #                     lr_decay=0.995,
+    #                     verbose=True, print_every=10)
+    #     solver.train()
+    #     plt.plot(solver.loss_history)
+    #     plt.xlabel('Iteration')
+    #     plt.ylabel('Loss')
+    #     plt.title('Training loss history')
+    #     plt.show()
+    params_path = 'files/lstm_params.npy'
+    lstm = CaptioningRNN(input_dim, output_dim, hidden_dim=3096, cell_type='lstm', load_param=params_path)
+    solver = Solver(lstm, {})
     test_data = {}
-    test_start = 2000
-    test_end = 4000
-    test_in = data[test_start:test_end, :]
-    test_out = data_str[test_start + 1:test_end + 1]
-    test_result = d.load_data()[test_start + 1:test_end + 1, d.binary_result]
-    test_in = test_in.reshape(-1, 2, input_dim)
-    test_out = test_out.reshape(-1, 2)
-    test_result = test_result.reshape(-1, 2)
+    # test_start = 2000
+    # test_end = 4000
+    # test_in = data[test_start:test_end, :]
+    # test_out = data_str[test_start + 1:test_end + 1]
+    # test_result = d.load_data()[test_start + 1:test_end + 1, d.binary_result]
+    # test_in = test_in.reshape(-1, 2, input_dim)
+    # test_out = test_out.reshape(-1, 2)
+    # test_result = test_result.reshape(-1, 2)
+    test_in, test_out, test_result = init.lstm_input(data[2000:], data_str[2000:],
+                                                     d.load_data()[2000:, d.binary_result], output_num=5000)
     test_data['test_in'] = test_in
     test_data['test_out'] = test_out
     test_data['test_result'] = test_result
-    tp, tn, fp, fn, count = solver.test(test_data, features)
-    print 'true positive: ', tp / count
-    print 'true negative: ', tn / count
-    print 'false positive: ', fp / count
-    print 'false negative: ', fn / count
+    for i in range(1, 10):
+        tp, tn, fp, fn, count = solver.test(test_data, features)
+        print 'k=', i
+        print 'true positive: ', tp / count
+        print 'true negative: ', tn / count
+        print 'false positive: ', fp / count
+        print 'false negative: ', fn / count

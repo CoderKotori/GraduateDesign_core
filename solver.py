@@ -105,7 +105,7 @@ class Solver(object):
         else:
             return False
 
-    def test(self, data_test, features):
+    def test(self, data_test, features, k=5):
         test_in = data_test['test_in']
         test_out = data_test['test_out']
         test_result = data_test['test_result']
@@ -116,21 +116,20 @@ class Solver(object):
         tn = 0
         fp = 0
         fn = 0
-        count = N * T
+        count = N
         print count
         for i in range(N):
-            for t in range(T):
-                '''top k=5'''
-                index = np.argpartition(scores[i, t], -5)[-5:]
-                prob_result = features[index]
-                if test_out[i, t] in prob_result:
-                    if test_result[i, t] == 0:
-                        tn += 1.0
-                    else:
-                        fn += 1.0
+            '''top k=5'''
+            index = np.argpartition(scores[i, -1], -k)[-k:]
+            prob_result = features[index]
+            if test_out[i, -1] in prob_result:
+                if test_result[i] == 0:
+                    tn += 1.0
                 else:
-                    if test_result[i, t] == 0:
-                        fp += 1.0
-                    else:
-                        tp += 1.0
+                    fn += 1.0
+            else:
+                if test_result[i] == 0:
+                    fp += 1.0
+                else:
+                    tp += 1.0
         return tp, tn, fp, fn, count

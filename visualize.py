@@ -73,7 +73,10 @@ for i in range(data.shape[0]):
 # plt.show()
 # print 'crc rate done'
 #
-# plt.hist(pm, 100)
+# pm = np.array(pm)
+# pm.sort()
+# pm = pm.tolist()
+# plt.hist(pm[:int(len(pm)*0.95)], 100)
 # plt.title('pressure measurement')
 # plt.savefig('files/pressure_measurement.png')
 # plt.show()
@@ -95,20 +98,28 @@ for i in range(data.shape[0]):
 
 # ax = plt.subplot(111, projection='3d')
 # color = np.random.rand(x.shape[0])
-# aa = ax.scatter(x, y, z, marker='.', c=color)
+# aa = ax.scatter(x, y, z, marker='.', color='g')
+# ax.set_zlabel('Z')
+# ax.set_ylabel('Y')
+# ax.set_xlabel('X')
 # plt.title('pid-3d')
 # plt.colorbar(aa)
 # plt.show()
 
-
-test_result = np.load('files/disc_result.npy')
+test_result = np.load('files/disc_result.bp.npy')
 pid = test_result[:, 0]
 pm = test_result[:, 1]
 sp = test_result[:, 2]
 # res = test_result[:, 3]
-res = test_result[:, 6]/(test_result[:, 6] + test_result[:, -1])
+res = (np.ceil(test_result[:, 3]/10))
 # res = (res - np.min(res)) / (np.max(res) - np.min(res))
 ax = plt.subplot(111, projection='3d')
+ax.set_xlabel('pid')
+ax.set_ylabel('pressure measurement')
+ax.set_zlabel('set point')
 aa = ax.scatter(pid, pm, sp, marker='.', c=res)
+plt.title('number of normal features')
 plt.colorbar(aa)
 plt.show()
+with open('disc_result.json', 'w') as f:
+    json.dump(test_result.tolist(), f)

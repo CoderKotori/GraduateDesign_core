@@ -1,5 +1,5 @@
 from solver import Solver
-
+import time
 if __name__ == '__main__':
     from BloomFilter import BloomFilter
     from Data import Data
@@ -86,20 +86,14 @@ if __name__ == '__main__':
     lstm_out = lstm_out.reshape((N, -1))
 
     bf = BloomFilter(mode='verify')
-    lstm = CaptioningRNN(D, output_dim, hidden_dim=512, cell_type='lstm', load_param='files/lstm_params.npy')
-    solver = Solver(lstm, {}, update_rule='adam',
-                    num_epochs=10,
-                    batch_size=100,
-                    optim_config={
-                        'learning_rate': 5e-3,
-                    },
-                    lr_decay=0.995,
-                    verbose=True, print_every=10)
+    lstm = CaptioningRNN(D, output_dim, hidden_dim=3096, cell_type='lstm', load_param='files/lstm_params.npy')
+    solver = Solver(lstm, {})
     tp = 0
     tn = 0
     fp = 0
     fn = 0
     for i in range(N):
+            cur = time.time()
         #  Third: using pre-trained Bloom Filter to verify data, if normal, go on
         # if bf.run(bf_in[i]):
             data_verify = {}
@@ -120,6 +114,8 @@ if __name__ == '__main__':
         #         fp += 1.0
         #     else:
         #         tp += 1.0
+            print time.time() - cur
+
     count = N + 0.0
     print 'true positive: ', tp/count
     print 'true negative: ', tn/count
