@@ -239,16 +239,16 @@ if __name__ == '__main__':
     # data_in = data_in.reshape(num_train, seq_length, input_dim)
     # data_out = data_out.reshape(num_train, seq_length)
 
-    # data_in, data_out = init.init_input(data, data_str, d.load_data()[:, d.binary_result].astype(int),
-    #                                     output_num=num_train,
-    #                                     length=seq_length)
-    # data_out = data_out.reshape(-1)
-    # for i in range(data_out.shape[0]):
-    #     pos = np.where(features == data_out[i])[0][0]
-    #     # print i, ',', pos
-    #     data_out[i] = int(pos)
-    # data_out = data_out.astype(int)
-    # data_out = data_out.reshape((num_train, seq_length))
+    data_in, data_out = init.init_input(data, data_str, d.load_data()[:, d.binary_result].astype(int),
+                                        output_num=num_train,
+                                        length=seq_length)
+    data_out = data_out.reshape(-1)
+    for i in range(data_out.shape[0]):
+        pos = np.where(features == data_out[i])[0][0]
+        # print i, ',', pos
+        data_out[i] = int(pos)
+    data_out = data_out.astype(int)
+    data_out = data_out.reshape((num_train, seq_length))
 
     # for i in range(num_train / 100):
     #     if i == 0:
