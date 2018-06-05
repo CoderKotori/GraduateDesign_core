@@ -86,7 +86,10 @@ class BloomFilter:
             verify = True
             for i in range(tmp.shape[0]):
                 verify = verify and self._judge(tmp[i])
-            return verify
+            if verify:
+                return 0
+            else:
+                return 1
         else:
             print 'this situation can not happen'
 

@@ -155,7 +155,7 @@ class CaptioningRNN(object):
 
         return loss, grads
 
-    def verify(self, data_in, prev_h1, prev_c1, prev_h2, prev_c2, k=5):
+    def verify(self, data_in, prev_h1, prev_c1, prev_h2, prev_c2, features, out, k=5):
         # Input-to-hidden, hidden-to-hidden, and biases for the RNN
         Wx, Wh, b = self.params['Wx'], self.params['Wh'], self.params['b']
         Wx2, Wh2, b2 = self.params['Wx2'], self.params['Wh2'], self.params['b2']
@@ -163,16 +163,16 @@ class CaptioningRNN(object):
         W_vocab, b_vocab = self.params['W_vocab'], self.params['b_vocab']
         next_h1, next_c1, _ = lstm_step_forward(data_in, prev_h1, prev_c1, Wx, Wh, b)
         next_h2, next_c2, _ = lstm_step_forward(next_h1, prev_h2, prev_c2, Wx2, Wh2, b2)
-        scores = temporal_affine_forward(next_h2, W_vocab, b_vocab)
+        scores, _ = temporal_affine_forward(next_h2.reshape((1, 1, -1)), W_vocab, b_vocab)
         N, T, _ = scores.shape
         for i in range(N):
             for t in range(T):
                 index = np.argpartition(scores[i, t], -k)[-k:]
                 prob_result = features[index]
-                if test_out[i, t] in prob_result:
-                    return True
+                if out in prob_result:
+                    return next_h1, next_c1, next_h2, next_c2, 0
                 else:
-                    return False
+                    return next_h1, next_c1, next_h2, next_c2, 1
 
 
 if __name__ == '__main__':
@@ -204,8 +204,10 @@ if __name__ == '__main__':
                           axis=1)
     input_dim = data.shape[1]
     data = data.astype(float)
+    min_max = []
     for j in range(input_dim):
         min, max = np.nanmin(data[:, j]), np.nanmax(data[:, j])
+        # min_max.append([min, max])
         # print min, max
         for i in range(data.shape[0]):
             if np.isnan(data[i, j]):
@@ -276,16 +278,16 @@ if __name__ == '__main__':
     lstm = CaptioningRNN(input_dim, output_dim, hidden_dim=3096, cell_type='lstm', load_param=params_path)
     solver = Solver(lstm, {})
     test_data = {}
-    # test_start = 2000
-    # test_end = 4000
-    # test_in = data[test_start:test_end, :]
-    # test_out = data_str[test_start + 1:test_end + 1]
-    # test_result = d.load_data()[test_start + 1:test_end + 1, d.binary_result]
-    # test_in = test_in.reshape(-1, 2, input_dim)
-    # test_out = test_out.reshape(-1, 2)
-    # test_result = test_result.reshape(-1, 2)
-    test_in, test_out, test_result = init.lstm_input(data[2000:], data_str[2000:],
-                                                     d.load_data()[2000:, d.binary_result], output_num=5000)
+    test_start = 2000
+    test_end = 4000
+    test_in = data[test_start:test_end, :]
+    test_out = data_str[test_start + 1:test_end + 1]
+    test_result = d.load_data()[test_start + 1:test_end + 1, d.binary_result]
+    test_in = test_in.reshape(-1, 2, input_dim)
+    test_out = test_out.reshape(-1, 2)
+    test_result = test_result.reshape(-1, 2)
+    # test_in, test_out, test_result = init.lstm_input(data[2000:], data_str[2000:],
+    #                                                  d.load_data()[2000:, d.binary_result], output_num=5000)
     test_data['test_in'] = test_in
     test_data['test_out'] = test_out
     test_data['test_result'] = test_result
